@@ -1,0 +1,94 @@
+// Merge Cars: Idle Car Tycoon Game
+// React + TailwindCSS + drag-and-drop support
+
+import React, { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+
+const CAR_LEVELS = [
+  { id: 1, name: "Car Lv.1", income: 1, color: "bg-gray-300" },
+  { id: 2, name: "Car Lv.2", income: 3, color: "bg-blue-300" },
+  { id: 3, name: "Car Lv.3", income: 8, color: "bg-green-300" },
+  { id: 4, name: "Car Lv.4", income: 20, color: "bg-yellow-300" },
+  { id: 5, name: "Car Lv.5", income: 50, color: "bg-red-300" },
+];
+
+const getRandomCar = () => {
+  return { ...CAR_LEVELS[0], key: Date.now() + Math.random() };
+};
+
+export default function MergeCarsGame() {
+  const [grid, setGrid] = useState(Array(9).fill(null));
+  const [money, setMoney] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const income = grid.reduce((acc, car) => car ? acc + car.income : acc, 0);
+      setMoney(m => m + income);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [grid]);
+
+  const handleDrop = (fromIndex, toIndex) => {
+    setGrid(prev => {
+      const newGrid = [...prev];
+      const fromCar = newGrid[fromIndex];
+      const toCar = newGrid[toIndex];
+
+      if (!fromCar || !toCar) return prev;
+
+      if (fromCar.id === toCar.id && fromIndex !== toIndex) {
+        const nextLevel = CAR_LEVELS.find(lvl => lvl.id === fromCar.id + 1);
+        if (nextLevel) {
+          newGrid[toIndex] = { ...nextLevel, key: Date.now() + Math.random() };
+          newGrid[fromIndex] = null;
+        }
+      }
+      return newGrid;
+    });
+  };
+
+  const placeNewCar = () => {
+    setGrid(prev => {
+      const newGrid = [...prev];
+      const emptyIndex = newGrid.findIndex(cell => cell === null);
+      if (emptyIndex !== -1) {
+        newGrid[emptyIndex] = getRandomCar();
+      }
+      return newGrid;
+    });
+  };
+
+  return (
+    <div className="p-4 max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold text-center mb-4">🚗 Merge Cars: Idle Tycoon</h1>
+      <div className="text-center mb-4">💰 Money: ${money}</div>
+      <Button className="mb-4" onClick={placeNewCar}>Buy Car ($0)</Button>
+      <div className="grid grid-cols-3 gap-2">
+        {grid.map((car, index) => (
+          <div
+            key={index}
+            className="w-full aspect-square bg-gray-100 rounded-xl flex items-center justify-center relative"
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => {
+              const fromIndex = parseInt(e.dataTransfer.getData("car-index"));
+              handleDrop(fromIndex, index);
+            }}
+          >
+            {car && (
+              <motion.div
+                className={`w-20 h-20 rounded-xl text-xs text-center flex items-center justify-center cursor-pointer ${car.color}`}
+                draggable
+                onDragStart={e => e.dataTransfer.setData("car-index", index)}
+                layoutId={car.key.toString()}
+              >
+                {car.name}
+              </motion.div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
