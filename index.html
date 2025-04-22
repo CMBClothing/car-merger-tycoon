@@ -1,9 +1,5 @@
-// Merge Cars: Idle Car Tycoon Game
-// React + TailwindCSS + drag-and-drop support
-
+// src/MergeCarsGame.js
 import React, { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 const CAR_LEVELS = [
@@ -64,7 +60,12 @@ export default function MergeCarsGame() {
     <div className="p-4 max-w-xl mx-auto">
       <h1 className="text-2xl font-bold text-center mb-4">🚗 Merge Cars: Idle Tycoon</h1>
       <div className="text-center mb-4">💰 Money: ${money}</div>
-      <Button className="mb-4" onClick={placeNewCar}>Buy Car ($0)</Button>
+      <button
+        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mb-4"
+        onClick={placeNewCar}
+      >
+        Buy Car ($0)
+      </button>
       <div className="grid grid-cols-3 gap-2">
         {grid.map((car, index) => (
           <div
@@ -88,6 +89,11 @@ export default function MergeCarsGame() {
             )}
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
       </div>
     </div>
   );
